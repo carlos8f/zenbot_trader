@@ -2,7 +2,7 @@ var parallel = require('run-parallel')
   , tb = require('timebucket')
 
 module.exports = function container (get, set, clear) {
-  var c = get('constants')
+  var c = get('core.constants')
   var create_tick = get('create_tick')
   var get_timestamp = get('utils.get_timestamp')
   return function process_trades (trades, cb) {

@@ -1,10 +1,10 @@
 module.exports = function container (get, set, clear) {
   var log_trades = get('utils.log_trades')
-  var c = get('constants')
+  var c = get('core.constants')
   var process_trades = get('process_trades')
   var idle = false
   return function reduce_trades () {
-    get('motley:db.trades').select({query: {processed: false}, limit: c.trade_reducer_limit}, function (err, trades) {
+    get('motley:db.trades').select({query: {processed: false}, limit: c.reducer_limit}, function (err, trades) {
       if (err) {
         if (get('app').closing) return
         throw err
@@ -12,8 +12,8 @@ module.exports = function container (get, set, clear) {
       var timeout
       if (!trades.length) {
         idle = true
-        //get('logger').info('trade reducer', 'idle'.grey)
-        timeout = setTimeout(reduce_trades, trades.length ? 0 : c.tick)
+        get('logger').info('trade reducer', 'idle'.grey)
+        timeout = setTimeout(reduce_trades, trades.length ? 0 : c.brain_speed_ms)
         set('timeouts[]', timeout)
       }
       else {
@@ -24,7 +24,7 @@ module.exports = function container (get, set, clear) {
           }
           idle = false
           log_trades('trade reducer', trades)
-          timeout = setTimeout(reduce_trades, trades.length ? 0 : c.tick)
+          timeout = setTimeout(reduce_trades, trades.length ? 0 : c.brain_speed_ms)
           set('timeouts[]', timeout)
         })
       }
